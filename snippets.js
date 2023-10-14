@@ -9,14 +9,15 @@ function message_handle(input){
         var resultado = input.match(regex)
         console.log("codigo parseado: " + resultado)
         try {
+            let first_code = String(resultado).substring(0, 22)
             const el = document.createElement('textarea');
-            el.value = resultado;
+            el.value = first_code;
             document.body.appendChild(el);
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            console.log("texto copiado: " + input);
-            window.open("http://127.0.0.1:8000", '_blank');
+            console.log("texto copiado: " + first_code);
+            // window.open("http://127.0.0.1:8000", '_blank');
 
         }catch (err) {
     console.error("Erro ao copiar texto para a área de transferência:", err);  
