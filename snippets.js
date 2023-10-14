@@ -1,5 +1,6 @@
 let chat_holder = document.querySelector('.chat-2ZfjoI')
-let caching;
+let cache_size = 1
+let caching = []
 
 function message_handle(input){
     console.log(input)
@@ -20,13 +21,34 @@ function message_handle(input){
         }catch (err) {
     console.error("Erro ao copiar texto para a área de transferência:", err);  
         }
-    }else { console.log("elemento ordinario, nada copiado")}
+    }else { console.log("----------!")}
 }
 
-function print_last_message(){
-    var getElementos = document.querySelectorAll('.messageListItem-ZZ7v6g')
-    var ultimo = getElementos[getElementos.length -1]
-    var lastDiv = ultimo.querySelectorAll('div[id*="content"]')
+function get_last_messages(){
+    var getElementos = document.querySelectorAll('.messageListItem-ZZ7v6g')   
+    // var ultimo = getElementos[getElementos.length - cache_size]
+    // var last_message = get_innerText(ultimo)
+    for (let i=1; i<=cache_size;i++){
+        var ultimo = getElementos[getElementos.length - i]
+        var last_message = get_innerText(ultimo)
+        if(!caching.includes(last_message)){
+            message_handle(last_message)
+            cache_shifting(last_message)
+        }
+    }
+}
+
+function callback() {
+    get_last_messages()
+}
+
+function do_fetch(){
+    window.open('http://localhost:8000', '_blank')
+
+}
+
+function get_innerText(input){
+    lastDiv = input.querySelectorAll('div[id*="content"]')
     last_message = ""
     if (lastDiv[0].childNodes.length>1){
         for (let i = 0; i < lastDiv[0].childNodes.length; i++) {
@@ -37,20 +59,18 @@ function print_last_message(){
         for (let i=0; i < lastDiv[0].childNodes.length; i++) {
             last_message += lastDiv[0].childNodes[0].innerText
         }
+    }  
+    return last_message
+
+}
+
+function cache_shifting(input){
+    caching.push(input)
+    if(caching.length == 5){
+        caching.shift()
     }
-
-    last_message == caching? null: message_handle(last_message)
-    caching = last_message
 }
 
-function callback() {
-    print_last_message()
-}
-
-function do_fetch(){
-    window.open('http://localhost:8000', '_blank')
-
-}
 let config = { childList: true, subtree: true }
 let observer = new MutationObserver(callback);
 
