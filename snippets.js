@@ -1,4 +1,4 @@
-let chat_holder = document.querySelector('.chat-2ZfjoI')
+let chat_holder = document.querySelector('.scrollerInner-2PPAp2')
 let cache_size = 1
 let caching = []
 
@@ -26,11 +26,10 @@ function message_handle(input){
 
 function get_last_messages(){
     var getElementos = document.querySelectorAll('.messageListItem-ZZ7v6g')   
-    // var ultimo = getElementos[getElementos.length - cache_size]
-    // var last_message = get_innerText(ultimo)
     for (let i=1; i<=cache_size;i++){
         var ultimo = getElementos[getElementos.length - i]
         var last_message = get_innerText(ultimo)
+        if (!last_message){ return;}
         if(!caching.includes(last_message)){
             message_handle(last_message)
             cache_shifting(last_message)
@@ -59,9 +58,10 @@ function get_innerText(input){
         for (let i=0; i < lastDiv[0].childNodes.length; i++) {
             last_message += lastDiv[0].childNodes[0].innerText
         }
-    }  
-    return last_message
-
+    } 
+    
+    let regex = /[a-zA-Z0-9]/
+    return regex.test(last_message)?last_message:null;
 }
 
 function cache_shifting(input){
@@ -71,7 +71,33 @@ function cache_shifting(input){
     }
 }
 
-let config = { childList: true, subtree: true }
+let config = {
+    attributes: true,
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributeOldValue: true,
+    characterDataOldValue: true,
+  };
 let observer = new MutationObserver(callback);
 
 observer.observe(chat_holder, config)
+
+
+function encontrarElementoRaiz(elemento) {
+    // Se o elemento não tiver um pai, ele é a raiz
+    if (!elemento.parentNode) {
+        return elemento;
+    }
+    // Chama recursivamente a função com o pai do elemento atual
+    return encontrarElementoRaiz(elemento.parentNode);
+}
+
+
+
+function find_not_usefull(input){
+    if (!input.parentNode) {
+        return input;
+    }
+    return find_not_usefull(input.parentNode)
+}
