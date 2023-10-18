@@ -2,36 +2,24 @@ let chat_holder = document.querySelector('.scrollerInner-2PPAp2')
 let cache_size = 1
 let caching = []
 
-function message_handle(input){
-    console.log(input)
-    let regex = /[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}/g;
-    if (regex.test(input)){
-        var resultado = input.match(regex)
-        console.log("codigo parseado: " + resultado)
-        try {
-            let first_code = String(resultado).substring(0, 22)
-            const el = document.createElement('textarea');
-            el.value = first_code;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            console.log("texto copiado: " + first_code);
-
-        }catch (err) {
-    console.error("Erro ao copiar texto para a área de transferência:", err);  
-        }
-    }else { console.log("----------!")}
-}
-
 function get_last_messages(){
-    var getElementos = document.querySelectorAll('.messageListItem-ZZ7v6g')   
+    var getElementos = document.querySelectorAll('.messageListItem-ZZ7v6g')
+    var elemento_caching = []
     for (let i=1; i<=cache_size;i++){
         var ultimo = getElementos[getElementos.length - i]
-        var last_message = get_innerText(ultimo)
-        if (!last_message){ return;}
+        var last_message = get_image(ultimo)
+        var text = get_innerText(ultimo)
+        if (!last_message){
+            console.log("nao é imagem, ou é so texto,")
+            return;}
+        if (last_message && text){
+                if(text){
+                    console.log("tem imagem e texto")
+                    elemento_caching = [last_message, text]
+                }
+                 elemento_caching = [last_message, ''] 
+        }
         if(!caching.includes(last_message)){
-            message_handle(last_message)
             cache_shifting(last_message)
         }
     }
@@ -41,6 +29,13 @@ function callback() {
     get_last_messages()
 }
 
+function get_image(input){
+    var tagA = input.querySelector('[data-role="img"')
+    if (tagA == null) {return;}
+    var linkImg = tagA.getAttribute('href')
+    console.log("link da imagem:" +  linkImg)
+    return linkImg; //retorna pro cache pra caso mandem repetida nao repetir
+}
 
 function get_innerText(input){
     lastDiv = input.querySelectorAll('div[id*="content"]')
@@ -49,15 +44,9 @@ function get_innerText(input){
         for (let i = 0; i < lastDiv[0].childNodes.length; i++) {
             last_message += lastDiv[0].childNodes[i].innerText
         }
+        return last_message
     }
-    else{
-        for (let i=0; i < lastDiv[0].childNodes.length; i++) {
-            last_message += lastDiv[0].childNodes[0].innerText
-        }
-    } 
-    
-    let regex = /[a-zA-Z0-9]/
-    return regex.test(last_message)?last_message:null;
+    return null
 }
 
 function cache_shifting(input){
@@ -68,12 +57,7 @@ function cache_shifting(input){
 }
 
 let config = {
-    attributes: true,
     childList: true,
-    subtree: true,
-    characterData: true,
-    attributeOldValue: true,
-    characterDataOldValue: true,
   };
 let observer = new MutationObserver(callback);
 
